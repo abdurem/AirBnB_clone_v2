@@ -4,6 +4,8 @@ Flask web frame work
 """
 from flask import Flask, render_template
 from flask.templating import render_template
+from models import storage
+from models import *
 app = Flask(__name__)
 
 
@@ -52,6 +54,22 @@ def display_page_int_parity(n):
         return render_template('6-number_odd_or_even.html', n=n, parity='even')
     else:
         return render_template('6-number_odd_or_even.html', n=n, parity='odd')
+
+
+@app.teardown_appcontext
+def tear_down(self):
+    """after each request remove current SQLAlchemy session"""
+    storage.close()
+
+
+@app.route('/states_list')
+def html_fetch_states():
+    """display html page
+       fetch sorted states to insert into html in UL tag
+    """
+    states = [s for s in storage.all("State").values()]
+    return render_template('7-states_list.html',
+                           states=states)
 
 
 if __name__ == '__main__':
